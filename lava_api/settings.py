@@ -1,7 +1,3 @@
-"""
-Django lava_api for lava_api project.
-"""
-
 import os
 from pathlib import Path
 
@@ -9,7 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'your-secret-key'
+SECRET_KEY = 'secret-key'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -24,8 +20,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # Django REST Framework
-    'apiapp',        # Your API app
+    'rest_framework',
+    'apiapp',
     'drf_yasg'
 ]
 

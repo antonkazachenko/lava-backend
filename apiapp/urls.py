@@ -1,5 +1,7 @@
 from django.urls import path, re_path, include
 from .views import GroupedItemsView, ItemDetailView, RandomItemsView, AllItemsView
+from . import views
+from .views import health_check_view
 
 # Import Swagger modules:
 from drf_yasg.views import get_schema_view
@@ -21,6 +23,8 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('health/', health_check_view, name='health-check'),
+
     # Your API endpoints:
     path('api/groups/<str:group_field>/<str:group_value>/', GroupedItemsView.as_view(), name='grouped_items'),
     path('api/items/<int:id>/', ItemDetailView.as_view(), name='item_detail'),

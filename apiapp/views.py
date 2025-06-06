@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
 from .models import TopicItem
 from .serializers import TopicItemSerializer, TopicItemSummarySerializer
 import random
@@ -79,3 +80,10 @@ class AllItemsView(APIView):
             items = []
         serializer = TopicItemSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+def health_check_view(request):
+    """
+    A simple view that returns a 200 OK JSON response.
+    It does NOT touch the database.
+    """
+    return JsonResponse({"status": "healthy", "message": "OK"})

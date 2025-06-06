@@ -1,0 +1,13 @@
+services:
+  - type: pserv
+    name: lava-db
+    env: postgres
+
+  - type: web
+    name: lava-app
+    env: docker
+    repo: https://github.com/antonkazachenko/YOUR_REPO_NAME.git
+    preDeployCommand: "python manage.py migrate && python manage.py populate_db"
+    database:
+      name: lava-db
+      property: connectionString

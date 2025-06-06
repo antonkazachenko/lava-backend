@@ -1,8 +1,22 @@
+# Ignore Python's virtual environment folder
+venv/
+*.venv
+
+# Ignore the local SQLite database
+db.sqlite3
+
+# Ignore Python's compiled files and cache folders
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Ignore Docker and Git specific files
 .git/
-.venv/
-env/
-*.sqlite3
+.gitignore
+.dockerignore
+Dockerfile
+
+# Ignore other miscellaneous files if they are not needed in the final image
+environment.yml
+swagger.yaml

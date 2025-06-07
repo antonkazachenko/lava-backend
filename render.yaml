@@ -1,20 +1,11 @@
 services:
-  # This section defines your PostgreSQL Database
-  - type: pserv
-    name: lava-db # Or whatever you named your database on Render
-    env: postgres
-
-  # This section defines your Web Service
   - type: web
-    name: lava-app # Or whatever you named your web service on Render
+    name: lava-app # Your service name
     env: docker
-    repo: https://github.com/antonkazachenko/lava-backend.git # 👈 IMPORTANT: Change this!
+    repo: https://github.com/antonkazachenko/lava-backend.git # Your repo URL
     healthCheckPath: /api/health/
-
-    # This command will run on your next deploy to set everything up.
     preDeployCommand: "python manage.py migrate && python manage.py populate_db"
-
-    # This tells Render how to connect your app to your database.
+    # The database connection is handled here
     database:
-      name: lava-db
+      name: lava-db # Your database name
       property: connectionString

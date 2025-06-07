@@ -1,7 +1,5 @@
-from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('apiapp.urls')),  # include API app endpoints
+    path('api/', include('apiapp.urls')),
 ]

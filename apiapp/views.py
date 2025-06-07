@@ -1,89 +1,74 @@
+# apiapp/views.py
+import pandas as pd
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, generics
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
-from .models import TopicItem
-from .serializers import TopicItemSerializer, TopicItemSummarySerializer
-import random
 
-# 1. Fetch Items by Group
+# The path to the CSV file *inside the Docker container*
+CSV_FILE_PATH = './predicted_topics.csv'
+
+# Load the entire CSV into memory once when the app starts.
+try:
+    df = pd.read_csv(CSV_FILE_PATH)
+    # Add a simple integer index if one doesn't exist to use as an 'id'
+    df.reset_index(inplace=True)
+    df.rename(columns={'index': 'id'}, inplace=True)
+except FileNotFoundError:
+    print(f"FATAL ERROR: The data file could not be found at {CSV_FILE_PATH}")
+    df = pd.DataFrame()  # Create an empty DataFrame if the file is missing
+
+
+class AllItemsView(APIView):
+    """Returns all records from the CSV."""
+
+    def get(self, request):
+        if df.empty:
+            return Response({"error": "Data file not found or is empty."}, status=500)
+        return Response(df.to_dict('records'))
+
+
+class ItemDetailView(APIView):
+    """Returns a specific item by its id."""
+
+    def get(self, request, item_id):
+        if df.empty:
+            return Response({"error": "Data file not found or is empty."}, status=500)
+
+        # Look for the item by the 'id' column
+        item = df[df['id'] == item_id]
+
+        if item.empty:
+            return Response({"error": "Item not found."}, status=404)
+        else:
+            # Return the first matching item as a dictionary
+            return Response(item.iloc[0].to_dict())
+
+
+class RandomItemsView(APIView):
+    """Returns 10 random records from the CSV."""
+
+    def get(self, request):
+        if df.empty:
+            return Response({"error": "Data file not found or is empty."}, status=500)
+
+        # Ensure we don't try to sample more items than exist
+        sample_count = min(10, len(df))
+        random_items = df.sample(n=sample_count)
+        return Response(random_items.to_dict('records'))
+
+
 class GroupedItemsView(APIView):
-    """
-    GET /api/groups/{group_field}/{group_value}/?page=1&pageSize=50
-    Returns all records where the specified group field matches group_value.
-    Allowed group fields: 'topic', 'website_url', 'cleaned_website_text'
-    """
-    allowed_fields = ['topic', 'website_url', 'cleaned_website_text']
+    """Returns all records where a field matches a value."""
 
     def get(self, request, group_field, group_value):
-        if group_field not in self.allowed_fields:
-            return Response(
-                {"error": f"Invalid group field. Allowed fields: {', '.join(self.allowed_fields)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        queryset = TopicItem.objects.filter(**{group_field: group_value})
-        page = request.query_params.get('page', 1)
-        page_size = request.query_params.get('pageSize', 50)
-        paginator = Paginator(queryset, page_size)
-        try:
-            items = paginator.page(page)
-        except PageNotAnInteger:
-            items = paginator.page(1)
-        except EmptyPage:
-            items = []
-        serializer = TopicItemSerializer(items, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if df.empty:
+            return Response({"error": "Data file not found or is empty."}, status=500)
 
-# 2. Fetch a Specific Item (Detailed View)
-class ItemDetailView(generics.RetrieveAPIView):
-    """
-    GET /api/items/{id}/
-    Returns all details for the item with the given id.
-    """
-    queryset = TopicItem.objects.all()
-    serializer_class = TopicItemSerializer
-    lookup_field = 'id'
+        if group_field not in df.columns:
+            return Response({"error": f"Invalid group field: {group_field}"}, status=400)
 
-# 3. Fetch 10 Random Items (Summary View)
-class RandomItemsView(APIView):
-    """
-    GET /api/random/
-    Returns a summary view of 10 random records.
-    """
-    def get(self, request):
-        count = 10
-        all_ids = list(TopicItem.objects.values_list('id', flat=True))
-        if not all_ids:
-            return Response([], status=status.HTTP_200_OK)
-        random_ids = random.sample(all_ids, min(count, len(all_ids)))
-        queryset = TopicItem.objects.filter(id__in=random_ids)
-        serializer = TopicItemSummarySerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # URL-decode the group_value to handle spaces, etc.
+        from urllib.parse import unquote
+        decoded_value = unquote(group_value)
 
-# 4. Fetch All Items with Pagination
-class AllItemsView(APIView):
-    """
-    GET /api/items/?page=1&pageSize=50
-    Returns all records with pagination.
-    """
-    def get(self, request):
-        queryset = TopicItem.objects.all()
-        page = request.query_params.get('page', 1)
-        page_size = request.query_params.get('pageSize', 50)
-        paginator = Paginator(queryset, page_size)
-        try:
-            items = paginator.page(page)
-        except PageNotAnInteger:
-            items = paginator.page(1)
-        except EmptyPage:
-            items = []
-        serializer = TopicItemSerializer(items, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-def health_check_view(request):
-    """
-    A simple view that returns a 200 OK JSON response.
-    It does NOT touch the database.
-    """
-    return JsonResponse({"status": "healthy", "message": "OK"})
+        grouped_items = df[df[group_field] == decoded_value]
+        return Response(grouped_items.to_dict('records'))

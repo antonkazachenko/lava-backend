@@ -1,11 +1,6 @@
+# render.yaml
 services:
   - type: web
-    name: lava-app # Your service name
+    name: lava-app
     env: docker
-    repo: https://github.com/antonkazachenko/lava-backend.git # Your repo URL
-    healthCheckPath: /api/health/
-    preDeployCommand: "python manage.py migrate && python manage.py populate_db"
-    # The database connection is handled here
-    database:
-      name: lava-db # Your database name
-      property: connectionString
+    repo: https://github.com/antonkazachenko/lava-backend.git # Make sure this is your URL

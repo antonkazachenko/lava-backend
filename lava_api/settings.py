@@ -13,11 +13,15 @@ INSTALLED_APPS = [
     'apiapp',
 ]
 
-MIDDLEWARE = []
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <-- ADD THIS LINE
+]
+
 ROOT_URLCONF = 'lava_api.urls'
 TEMPLATES = []
 WSGI_APPLICATION = 'lava_api.wsgi.application'
 
-# Static files for the browsable API
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # <-- ADD THIS LINE

@@ -1,6 +1,0 @@
-# render.yaml
-services:
-  - type: web
-    name: lava-app
-    env: docker
-    repo: https://github.com/antonkazachenko/lava-backend.git # Make sure this is your URL

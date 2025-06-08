@@ -18,6 +18,16 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware', # <-- ADD THIS LINE
 ]
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.dummy',
+    }
+}
+
+MIGRATION_MODULES = {
+    'apiapp': None,
+}
+
 ROOT_URLCONF = 'lava_api.urls'
 TEMPLATES = []
 WSGI_APPLICATION = 'lava_api.wsgi.application'

@@ -12,6 +12,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'rest_framework',
     'apiapp',
+    "corsheaders",
 ]
 
 # REST framework config: JSON only, no auth
@@ -30,6 +31,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 # Dummy DB (we load from CSV instead)
@@ -54,6 +56,11 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {},
     },
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://lava-data-lamp.netlify.app"
 ]
 
 WSGI_APPLICATION = 'lava_api.wsgi.application'
